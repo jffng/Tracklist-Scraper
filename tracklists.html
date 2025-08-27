@@ -1,0 +1,3806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracklist Collection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #ffffff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: #000000;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+            letter-spacing: -0.02em;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: 600;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            font-weight: 400;
+        }
+        
+        .tracklist {
+            background: white;
+            margin-bottom: 2px;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+        }
+        
+        .tracklist-header {
+            background: #f8f8f8;
+            color: #333;
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e0e0e0;
+            gap: 20px;
+        }
+        
+        .tracklist-header:hover {
+            background: #f0f0f0;
+        }
+        
+        .tracklist-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .tracklist-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            flex-shrink: 0;
+        }
+        
+        .tracklist-text {
+            flex: 1;
+        }
+        
+        .tracklist-title {
+            font-size: 1.2em;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .tracklist-subtitle {
+            font-size: 0.9em;
+            color: #666;
+            font-weight: 400;
+        }
+        
+        .tracklist-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .track-count {
+            background: #333;
+            color: white;
+            padding: 4px 8px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        
+        .tracks {
+            padding: 0;
+        }
+        
+        .track {
+            border-bottom: 1px solid #f0f0f0;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .track:last-child {
+            border-bottom: none;
+        }
+        
+        .track:hover {
+            background: #fafafa;
+        }
+        
+        .track-number {
+            background: #333;
+            color: white;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+        
+        .track-info {
+            flex: 1;
+        }
+        
+        .track-name {
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #333;
+        }
+        
+        .track-links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .platform-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            text-decoration: none;
+            font-size: 0.85em;
+            font-weight: 500;
+            border: 1px solid;
+            transition: all 0.2s ease;
+        }
+        
+        .youtube-link {
+            background: #fff;
+            color: #ff0000;
+            border-color: #ff0000;
+        }
+        
+        .youtube-link:hover {
+            background: #ff0000;
+            color: white;
+        }
+        
+        .discogs-link {
+            background: #fff;
+            color: #333;
+            border-color: #333;
+        }
+        
+        .discogs-link:hover {
+            background: #333;
+            color: white;
+        }
+        
+        .no-results {
+            color: #999;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+        
+        .confidence {
+            font-size: 0.8em;
+            color: #666;
+            margin-left: 4px;
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #333;
+            font-size: 1.2em;
+            cursor: pointer;
+            font-family: monospace;
+        }
+        
+        .tracks.collapsed {
+            display: none;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: #666;
+            font-size: 0.9em;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            header h1 {
+                font-size: 2em;
+            }
+            
+            .stats {
+                gap: 20px;
+            }
+            
+            .tracklist-info {
+                gap: 15px;
+            }
+            
+            .tracklist-image {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .tracklist-title {
+                font-size: 1.1em;
+            }
+            
+            .tracklist-subtitle {
+                font-size: 0.8em;
+            }
+            
+            .track {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .track-links {
+                width: 100%;
+            }
+        }
+        
+        .search-box {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .search-input {
+            padding: 12px 16px;
+            font-size: 1em;
+            font-family: 'Public Sans', sans-serif;
+            border: 1px solid #ccc;
+            width: 100%;
+            max-width: 400px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        
+        .search-input:focus {
+            border-color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎵 Tracklist Collection</h1>
+            <p>Curated music tracklists with YouTube and Discogs links</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-number">7</span>
+                    <span class="stat-label">Tracklists</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">173</span>
+                    <span class="stat-label">Total Tracks</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">173</span>
+                    <span class="stat-label">YouTube Links</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">135</span>
+                    <span class="stat-label">Discogs Links</span>
+                </div>
+            </div>
+        </header>
+        
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="Search tracks, artists, or tracklists..." id="searchInput">
+        </div>
+        
+        <div id="tracklists">
+
+            <div class="tracklist" data-title="hank jackson trip lick nts dec 2024">
+                <div class="tracklist-header" onclick="toggleTracklist(0)">
+                    <div class="tracklist-info">
+                        <img src="https://images.are.na/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiIzMzgxMjUwMC9vcmlnaW5hbF8wYWUwNzgzYTJjZDIzOTBlNDc1MmM4M2I2M2YxNzliYi5wbmciLCJlZGl0cyI6eyJyZXNpemUiOnsid2lkdGgiOjE4MDAsImhlaWdodCI6MTgwMCwiZml0IjoiaW5zaWRlIiwid2l0aG91dEVubGFyZ2VtZW50Ijp0cnVlfSwid2VicCI6eyJxdWFsaXR5Ijo3NX0sImpwZWciOnsicXVhbGl0eSI6NzV9LCJyb3RhdGUiOm51bGx9fQ==?bc=0" alt="Hank Jackson Trip Lick NTS Dec 2024" class="tracklist-image" loading="lazy">
+                        <div class="tracklist-text">
+                            <div class="tracklist-title">Hank Jackson Trip Lick NTS Dec 2024</div>
+                            <div class="tracklist-subtitle">31 tracks • 31 YouTube • 27 Discogs</div>
+                        </div>
+                    </div>
+                    <div class="tracklist-controls">
+                        <div class="track-count">31 tracks</div>
+                        <button class="toggle-btn" id="toggle-0">▼</button>
+                    </div>
+                </div>
+                <div class="tracks" id="tracks-0">
+
+                    <div class="track" data-track="etat brut - psychosomatique">
+                        <div class="track-number">1</div>
+                        <div class="track-info">
+                            <div class="track-name">Etat Brut - Psychosomatique</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=MEuzsqVzW64" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/749896-Etat-Brut-Emissions-1" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(40%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="valerio tricoli - in the eye of the cyclone">
+                        <div class="track-number">2</div>
+                        <div class="track-info">
+                            <div class="track-name">Valerio Tricoli - In The Eye of The Cyclone</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=b8mQ_CTty3g" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/5643158-Valerio-Tricoli-Miseri-Lares" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(22%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="m.all. - altair">
+                        <div class="track-number">3</div>
+                        <div class="track-info">
+                            <div class="track-name">M.ALL. - Altair</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=OAmlMzR6Igc" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/6562562-Jesuton-Show-Me-Your-Soul-Ao-Vivo" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(0%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="catherine christer hennix - solo for tamburium">
+                        <div class="track-number">4</div>
+                        <div class="track-info">
+                            <div class="track-name">Catherine Christer Hennix - Solo for Tamburium</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=VAOw3vpqqrE" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/27851973-Catherine-Christer-Hennix-Solo-For-Tamburium" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(90%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="adrian rew - 3/31/13: horseshoe casino, cleveland, oh">
+                        <div class="track-number">5</div>
+                        <div class="track-info">
+                            <div class="track-name">Adrian Rew - 3/31/13: Horseshoe Casino, Cleveland, OH</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=g5vh7XU69YA" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Adrian-Rew-Slot-Machine-Music/release/4729978" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(17%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="agf - aergia">
+                        <div class="track-number">6</div>
+                        <div class="track-info">
+                            <div class="track-name">AGF - Aergia</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=zsAtGadDgvo" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/15521005-AGF-GaiA-EP" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="gruppo di improvvisazione nuova consonanza - cantata">
+                        <div class="track-number">7</div>
+                        <div class="track-info">
+                            <div class="track-name">Gruppo di Improvvisazione Nuova Consonanza - Cantata</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=sARVfoHQc0Q" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/1708601-Gruppo-Di-Improvvisazione-Nuova-Consonanza-Gruppo-Di-Improvvisazione-Nuova-Consonanza" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="shiteluster - untitiled">
+                        <div class="track-number">8</div>
+                        <div class="track-info">
+                            <div class="track-name">Shiteluster - Untitiled</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=S4yYdkXRmAM" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="emeralds & dilloway - under pressure ">
+                        <div class="track-number">9</div>
+                        <div class="track-info">
+                            <div class="track-name">Emeralds & Dilloway - Under Pressure </div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=HUG2hBU9YE0" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/1342620-Emeralds-2-Dilloway-Under-Pressure" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="love spirals downwards - sidhe">
+                        <div class="track-number">10</div>
+                        <div class="track-info">
+                            <div class="track-name">Love Spirals Downwards - Sidhe</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=Qm7tPffliIU" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/139075-Love-Spirals-Downwards-Ardor" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(60%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="hamza el din - the water wheel">
+                        <div class="track-number">11</div>
+                        <div class="track-info">
+                            <div class="track-name">Hamza El Din - the Water Wheel</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=Oa_zc_M-2w8" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/1071426-Hamza-El-Din-Escalay-The-Water-Wheel" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="m.e.s.h. - methy imbi">
+                        <div class="track-number">12</div>
+                        <div class="track-info">
+                            <div class="track-name">M.E.S.H. - Methy Imbi</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=5kyfisxL_qM" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="moniek darge - rain">
+                        <div class="track-number">13</div>
+                        <div class="track-info">
+                            <div class="track-name">Moniek Darge - Rain</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=E5gEqTXqOQQ" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/705516-Moniek-Darge-Sounds-Of-Sacred-Places" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(29%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="jasmine guffond - variation two">
+                        <div class="track-number">14</div>
+                        <div class="track-info">
+                            <div class="track-name">Jasmine Guffond - Variation Two</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=b85amfFHgPw" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/31199059-Jasmine-Guffond-Alien-Intelligence" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(33%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="bridget st. john -  like to be with you in the sun (song for the laird of connaught hall)">
+                        <div class="track-number">15</div>
+                        <div class="track-info">
+                            <div class="track-name">Bridget St. John -  Like To Be With You In The Sun (Song For The Laird Of Connaught Hall)</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=XzbEb35R9r8" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/3982065-Bridget-St-John-Ask-Me-No-Questions-Songs-For-The-Gentle-Man" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(21%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="michael o'shea - anfa dasachtach">
+                        <div class="track-number">16</div>
+                        <div class="track-info">
+                            <div class="track-name">Michael O'Shea - Anfa Dasachtach</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=VNoWz78w_W8" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Michael-OShea-Michael-OShea/release/12924345" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(60%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="o yuki conjugate - aura">
+                        <div class="track-number">17</div>
+                        <div class="track-info">
+                            <div class="track-name">O Yuki Conjugate - Aura</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=hpSzdvGnvOI" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/294038-O-Yuki-Conjugate-Scene-In-Mirage" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(43%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="ulver - een stemme locker">
+                        <div class="track-number">18</div>
+                        <div class="track-info">
+                            <div class="track-name">Ulver - Een Stemme Locker</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=NApEQEr1c-E" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/372973-Ulver-Bergtatt-Et-Eeventyr-I-5-Capitler" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(10%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track=")n - the end">
+                        <div class="track-number">19</div>
+                        <div class="track-info">
+                            <div class="track-name">)n - The End</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=eVTXPUF4Oz4" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/8353681-The-Living-End-The-Living-End" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(50%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="love spirals downwards - by your side">
+                        <div class="track-number">20</div>
+                        <div class="track-info">
+                            <div class="track-name">Love Spirals Downwards - By Your Side</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=kzypybJbvec" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/67525-Love-Spirals-Downwards-Flux" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(43%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="bjom torske and prins thomas - 12 volt">
+                        <div class="track-number">21</div>
+                        <div class="track-info">
+                            <div class="track-name">Bjom Torske and Prins Thomas - 12 Volt</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=SXfDQYdJSFE" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="echostar - near lightning">
+                        <div class="track-number">22</div>
+                        <div class="track-info">
+                            <div class="track-name">EchoStar - Near Lightning</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=wh29CTW5KRs" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/650922-Echostar-Sola" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="infuso giallo - torus">
+                        <div class="track-number">23</div>
+                        <div class="track-info">
+                            <div class="track-name">Infuso Giallo - Torus</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=055ShH09jtU" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/13497385-Various-Elsewhere-LVI" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(0%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="john cale & terry riley - church of anthrax">
+                        <div class="track-number">24</div>
+                        <div class="track-info">
+                            <div class="track-name">John Cale & Terry Riley - Church Of Anthrax</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=FCRDq0Jyzv4" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/1363130-John-Cale-Terry-Riley-Church-Of-Anthrax" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(90%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="space time continuum - kairo">
+                        <div class="track-number">25</div>
+                        <div class="track-info">
+                            <div class="track-name">Space Time Continuum - Kairo</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=8Rb7vljQMXc" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/2057-Spacetime-Continuum-Emit-Ecaps" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(14%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="ooze - experimental mud in the dub comer">
+                        <div class="track-number">26</div>
+                        <div class="track-info">
+                            <div class="track-name">OOZE - Experimental Mud In The Dub Comer</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=qnw3Fx1v-sM" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="fs - little m">
+                        <div class="track-number">27</div>
+                        <div class="track-info">
+                            <div class="track-name">FS - Little M</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=xQoLSbFvTDo" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/200386-FS-Birth-Breath-LP" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(14%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="g.o.l. - soma holiday">
+                        <div class="track-number">28</div>
+                        <div class="track-info">
+                            <div class="track-name">G.O.L. - Soma Holiday</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=T9r7dr6lapI" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/1554055-GOL-Soma-Holiday" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(33%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="ganzheit - harmony">
+                        <div class="track-number">29</div>
+                        <div class="track-info">
+                            <div class="track-name">Ganzheit - Harmony</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=oDxDZAEqxGY" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/149260-Ganzheit-Brains-To-The-Wall" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(17%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="scape one - the tranquility alternative">
+                        <div class="track-number">30</div>
+                        <div class="track-info">
+                            <div class="track-name">Scape One - The Tranquility Alternative</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=X7ILTrbysn0" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Scape-One-The-FutureIt-Will-Never-Be-The-Same/release/186943" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(27%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="laika - almost sleeping">
+                        <div class="track-number">31</div>
+                        <div class="track-info">
+                            <div class="track-name">Laika - Almost Sleeping</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=Oh_QzhVOzd4" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Laika-Almost-Sleeping-Remixes/release/250127" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(90%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="tracklist" data-title="screenshot-2025-01-19-at-10.59.40-pm.png">
+                <div class="tracklist-header" onclick="toggleTracklist(1)">
+                    <div class="tracklist-info">
+                        <img src="https://images.are.na/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiIzMzgyMzgyNy9vcmlnaW5hbF82MmM2NTFiOGFjMjQwMDgwNjQxMTRkNmQ4MzM2Zjk3My5wbmciLCJlZGl0cyI6eyJyZXNpemUiOnsid2lkdGgiOjE4MDAsImhlaWdodCI6MTgwMCwiZml0IjoiaW5zaWRlIiwid2l0aG91dEVubGFyZ2VtZW50Ijp0cnVlfSwid2VicCI6eyJxdWFsaXR5Ijo3NX0sImpwZWciOnsicXVhbGl0eSI6NzV9LCJyb3RhdGUiOm51bGx9fQ==?bc=0" alt="screenshot-2025-01-19-at-10.59.40-pm.png" class="tracklist-image" loading="lazy">
+                        <div class="tracklist-text">
+                            <div class="tracklist-title">screenshot-2025-01-19-at-10.59.40-pm.png</div>
+                            <div class="tracklist-subtitle">22 tracks • 22 YouTube • 22 Discogs</div>
+                        </div>
+                    </div>
+                    <div class="tracklist-controls">
+                        <div class="track-count">22 tracks</div>
+                        <button class="toggle-btn" id="toggle-1">▼</button>
+                    </div>
+                </div>
+                <div class="tracks" id="tracks-1">
+
+                    <div class="track" data-track="metamatics - neo ouija">
+                        <div class="track-number">1</div>
+                        <div class="track-info">
+                            <div class="track-name">Metamatics - Neo Ouija</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=LvOCBnErp20" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/10304049-Metamatics-Neo-Ouija" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(90%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="irving project - pick me up (fudogz remix)">
+                        <div class="track-number">2</div>
+                        <div class="track-info">
+                            <div class="track-name">Irving Project - Pick Me Up (Fudogz remix)</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=zKcMJcpZp8g" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Irving-Project-Pick-Me-Up-Hard-Remixes/release/37517" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(56%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="soda - pannini">
+                        <div class="track-number">3</div>
+                        <div class="track-info">
+                            <div class="track-name">Soda - Pannini</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=42iol09ESeQ" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Soda-Motorcity/release/147590" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="portable - 60hz">
+                        <div class="track-number">4</div>
+                        <div class="track-info">
+                            <div class="track-name">Portable - 60hz</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=cz3hh_snCUM" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Portable-Flicker-EP/release/305769" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="krill.minima - kalmar">
+                        <div class="track-number">5</div>
+                        <div class="track-info">
+                            <div class="track-name">Krill.minima - Kalmar</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=YJ8T2iN0clQ" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/KrillMinima-KalamarKalmar/release/744952" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(75%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="readymade - bold">
+                        <div class="track-number">6</div>
+                        <div class="track-info">
+                            <div class="track-name">Readymade - Bold</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=zthdg7yuFdg" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Readymade-Bold/release/106914" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="velocette - en route">
+                        <div class="track-number">7</div>
+                        <div class="track-info">
+                            <div class="track-name">Velocette - En Route</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=P5YQwHMPByY" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/8307-Velocette-Changes-In-The-Rhythm-Of-Life" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(11%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="spielerei & mantacoup - cuba crisis">
+                        <div class="track-number">8</div>
+                        <div class="track-info">
+                            <div class="track-name">Spielerei & Mantacoup - Cuba Crisis</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=FK9gCyn7TKU" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/1022557-Spielerei-Mantacoup-Cold-War" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(33%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="vc - 118a - replace image">
+                        <div class="track-number">9</div>
+                        <div class="track-info">
+                            <div class="track-name">VC - 118A - Replace Image</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=aPHTzov75jA" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/28359868-VC-118A-Waves-Of-Change" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(29%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="b. rupp - wail away">
+                        <div class="track-number">10</div>
+                        <div class="track-info">
+                            <div class="track-name">B. Rupp - Wail Away</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=033GR2lYcow" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/32533017-B-Rupp-Pop-Music" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(33%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="mr. irl - how to fly">
+                        <div class="track-number">11</div>
+                        <div class="track-info">
+                            <div class="track-name">Mr. IRL - How To Fly</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=irnMSvJom_4" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Mr-IRL-Synthesized-Emotion/release/15794350" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(29%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="jeremiah - feel it">
+                        <div class="track-number">12</div>
+                        <div class="track-info">
+                            <div class="track-name">Jeremiah - Feel It</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=n4WjE7t5Bbk" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/7258531-MSMR-How-Does-It-Feel" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(33%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="quince - can’t hear you">
+                        <div class="track-number">13</div>
+                        <div class="track-info">
+                            <div class="track-name">Quince - Can’t Hear You</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=UiZ2Lj2301s" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/10022801-Various-Impulse-25-Seminal-Jazz-Albums-In-One-Box" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(0%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="jupiter 8000 - way out">
+                        <div class="track-number">14</div>
+                        <div class="track-info">
+                            <div class="track-name">Jupiter 8000 - Way Out</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=u0kxZygT-MA" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/67125-Jupiter-8000-Jupiter-8000" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(50%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="books - the approach">
+                        <div class="track-number">15</div>
+                        <div class="track-info">
+                            <div class="track-name">Books - The Approach</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=mMeNnX1FGgg" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/2336143-Down-To-Earth-Approach-Another-Intervention" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(12%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="danieto & flipper - inicio">
+                        <div class="track-number">16</div>
+                        <div class="track-info">
+                            <div class="track-name">Danieto & Flipper - Inicio</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=y6PqrTZsho0" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Danieto-Flipper-Multitono/release/705915" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(40%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="futique - sister freak">
+                        <div class="track-number">17</div>
+                        <div class="track-info">
+                            <div class="track-name">Futique - Sister Freak</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=HUsKRxVs7tM" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/114572-Futique-Paging-Mr-So-And-So" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(14%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="psi performer - 1990 (move d remix)">
+                        <div class="track-number">18</div>
+                        <div class="track-info">
+                            <div class="track-name">PSI Performer - 1990 (Move D remix)</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=KHblpzBfpDw" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/17407-Psi-Performer-Art-Is-A-Division-Of-Pain-Remixed-Part-2" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(13%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="johan skugge - decadence">
+                        <div class="track-number">19</div>
+                        <div class="track-info">
+                            <div class="track-name">Johan Skugge - Decadence</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=lxJreFLnKB0" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Johan-Skugge-Decadence-EP/release/376374" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(90%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="shinichi atobe - heat 1">
+                        <div class="track-number">20</div>
+                        <div class="track-info">
+                            <div class="track-name">Shinichi Atobe - Heat 1</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=9iwqUFA8MN8" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/12487397-Shinichi-Atobe-Heat" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(90%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="multipliar - deep service">
+                        <div class="track-number">21</div>
+                        <div class="track-info">
+                            <div class="track-name">Multipliar - Deep Service</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=tM0u7jdPEYQ" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/30370-Multipliar-Deep-Service-EP" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(90%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="folie - lanugo">
+                        <div class="track-number">22</div>
+                        <div class="track-info">
+                            <div class="track-name">Folie - Lanugo</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=yvb8xgymB2c" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Various-Mitek-Process/release/168935" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(0%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="tracklist" data-title="k wata lot radio 1-8-25">
+                <div class="tracklist-header" onclick="toggleTracklist(2)">
+                    <div class="tracklist-info">
+                        <img src="https://images.are.na/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiIzMzgzODgwNS9vcmlnaW5hbF9lMWUyZDE1YWI2NWY0YTMzMjRhYjNjNDc1ODhjNWU4Yi5qcGciLCJlZGl0cyI6eyJyZXNpemUiOnsid2lkdGgiOjE4MDAsImhlaWdodCI6MTgwMCwiZml0IjoiaW5zaWRlIiwid2l0aG91dEVubGFyZ2VtZW50Ijp0cnVlfSwid2VicCI6eyJxdWFsaXR5Ijo3NX0sImpwZWciOnsicXVhbGl0eSI6NzV9LCJyb3RhdGUiOm51bGx9fQ==?bc=0" alt="k wata lot radio 1-8-25" class="tracklist-image" loading="lazy">
+                        <div class="tracklist-text">
+                            <div class="tracklist-title">k wata lot radio 1-8-25</div>
+                            <div class="tracklist-subtitle">24 tracks • 24 YouTube • 21 Discogs</div>
+                        </div>
+                    </div>
+                    <div class="tracklist-controls">
+                        <div class="track-count">24 tracks</div>
+                        <button class="toggle-btn" id="toggle-2">▼</button>
+                    </div>
+                </div>
+                <div class="tracks" id="tracks-2">
+
+                    <div class="track" data-track="micro dubs 1 - 8-25">
+                        <div class="track-number">1</div>
+                        <div class="track-info">
+                            <div class="track-name">Micro Dubs 1 - 8-25</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=Ad-tsj4F7CM" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="in a way dub - infant">
+                        <div class="track-number">2</div>
+                        <div class="track-info">
+                            <div class="track-name">In a Way Dub - Infant</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=hPmCdoOgW_o" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/32320542-Infant-Spiral-Industries" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(12%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="sachte - pole">
+                        <div class="track-number">3</div>
+                        <div class="track-info">
+                            <div class="track-name">Sachte - Pole</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=KV-9aS4DipM" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/1412758-Pole-1-2-3" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(20%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="shuto expressway '71 - formen">
+                        <div class="track-number">4</div>
+                        <div class="track-info">
+                            <div class="track-name">Shuto Expressway '71 - Formen</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=A8d62GtdvME" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/30049324-Formen-Intermodulation" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(20%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="1.3 - — rain text">
+                        <div class="track-number">5</div>
+                        <div class="track-info">
+                            <div class="track-name">1.3 - — Rain Text</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=EnHvfywQYJ0" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/3453987-Rain-Tree-Crow-Rain-Tree-Crow" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(17%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="scrapple from the apple - pixel">
+                        <div class="track-number">6</div>
+                        <div class="track-info">
+                            <div class="track-name">Scrapple From The Apple - Pixel</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=AEDjl8gnVvk" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Pixel-Display/release/225322" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(14%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="vertigo 66 - caldera">
+                        <div class="track-number">7</div>
+                        <div class="track-info">
+                            <div class="track-name">Vertigo 66 - Caldera</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=2ImbtY1BAjY" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="beach - rod modell">
+                        <div class="track-number">8</div>
+                        <div class="track-info">
+                            <div class="track-name">Beach - Rod Modell</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=713t5-KxuUU" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/189807-Rod-Modell-Kettle-Point-EP" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(33%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="oacis - byetone">
+                        <div class="track-number">9</div>
+                        <div class="track-info">
+                            <div class="track-name">Oacis - Byetone</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=28HNsw15wLg" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Various-Raster-Noton-Oacis/release/47233" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(20%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="slowly counting backwards - — shifted">
+                        <div class="track-number">10</div>
+                        <div class="track-info">
+                            <div class="track-name">Slowly Counting Backwards - — Shifted</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=enJkY4V7bUQ" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/19390861-Shifted-Constant-Blue-Light" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(14%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="d'americana - gombeen & doygen">
+                        <div class="track-number">11</div>
+                        <div class="track-info">
+                            <div class="track-name">D'Americana - Gombeen & Doygen</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=IblevORE5BE" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/17642617-Gombeen-Doygen-DAmericana-Auto-Lies" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(67%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="murk - — billus">
+                        <div class="track-number">12</div>
+                        <div class="track-info">
+                            <div class="track-name">Murk - — Billus</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=6rlnkBnL1bU" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/27444111-Billus-Moon-Dust-In-Bloom" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(17%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="aerial red - — jetone">
+                        <div class="track-number">13</div>
+                        <div class="track-info">
+                            <div class="track-name">Aerial Red - — Jetone</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=BZ-Omo-ZvPY" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/34075-Jetone-Ultramarin" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="a2 - felix k & bassdee">
+                        <div class="track-number">14</div>
+                        <div class="track-info">
+                            <div class="track-name">A2 - Felix K & BassDee</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=gTx7JxGpgPk" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="risk - frank bretschneider">
+                        <div class="track-number">15</div>
+                        <div class="track-info">
+                            <div class="track-name">Risk - Frank Bretschneider</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=k9JVfCsQsTM" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Various-Clicks-Cuts-3/release/109244" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(0%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="a4 - paperclip minimiser">
+                        <div class="track-number">16</div>
+                        <div class="track-info">
+                            <div class="track-name">A4 - Paperclip Minimiser</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=hl8MbDTWKlk" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/24890738-Paperclip-Minimiser-Paperclip-Minimiser" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(67%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="hac (alva noto remodel) - sistol">
+                        <div class="track-number">17</div>
+                        <div class="track-info">
+                            <div class="track-name">Hac (Alva Noto Remodel) - Sistol</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=gQob91sEhZI" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/2416360-Vladislav-Delay-As-Sistol-Remakes" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(11%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="stepping back - loop lf">
+                        <div class="track-number">18</div>
+                        <div class="track-info">
+                            <div class="track-name">Stepping Back - Loop LF</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=T82ENKINd4k" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/10087749-Loop-LF-Stepping-Back-EP" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="napoli - szlo">
+                        <div class="track-number">19</div>
+                        <div class="track-info">
+                            <div class="track-name">Napoli - SZLO</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=fx4g0cOeR_A" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/30341696-SZLO-Op-Land" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="radiant - serwed">
+                        <div class="track-number">20</div>
+                        <div class="track-info">
+                            <div class="track-name">Radiant - Serwed</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=6ddkcMi5_to" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/13380587-Serwed-I" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(33%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="yah yah - tom ellis">
+                        <div class="track-number">21</div>
+                        <div class="track-info">
+                            <div class="track-name">Yah Yah - Tom Ellis</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=_nfUzTDt-os" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Tom-Ellis-Yah-Yah/release/3483846" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="handle with care - vivian">
+                        <div class="track-number">22</div>
+                        <div class="track-info">
+                            <div class="track-name">Handle With Care - Vivian</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=YrS1t5ZjomI" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Various-Sampler-50/release/15006728" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(0%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="nia - ikala — kit clayton">
+                        <div class="track-number">23</div>
+                        <div class="track-info">
+                            <div class="track-name">nia - ikala — Kit Clayton</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=Sh4q-TEF9A4" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/42533-Kit-Clayton-Nek-Sanalet" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(33%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="i saw a polysexual - vladislav delay">
+                        <div class="track-number">24</div>
+                        <div class="track-info">
+                            <div class="track-name">I Saw A Polysexual - Vladislav Delay</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=YXseAzuUn-s" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/930929-Vladislav-Delay-Whistleblower" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(29%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="tracklist" data-title="screenshot-2025-08-27-at-11.11.36-am.png">
+                <div class="tracklist-header" onclick="toggleTracklist(3)">
+                    <div class="tracklist-info">
+                        <img src="https://images.are.na/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiIzOTA5NTQzMy9vcmlnaW5hbF9iYjJlYzZkNmM2ZjAwNzQ5ODFjZjE0ZDhkMTAwMGU1NC5wbmciLCJlZGl0cyI6eyJyZXNpemUiOnsid2lkdGgiOjE4MDAsImhlaWdodCI6MTgwMCwiZml0IjoiaW5zaWRlIiwid2l0aG91dEVubGFyZ2VtZW50Ijp0cnVlfSwid2VicCI6eyJxdWFsaXR5Ijo3NX0sImpwZWciOnsicXVhbGl0eSI6NzV9LCJyb3RhdGUiOm51bGx9fQ==?bc=0" alt="screenshot-2025-08-27-at-11.11.36-am.png" class="tracklist-image" loading="lazy">
+                        <div class="tracklist-text">
+                            <div class="tracklist-title">screenshot-2025-08-27-at-11.11.36-am.png</div>
+                            <div class="tracklist-subtitle">34 tracks • 34 YouTube • 24 Discogs</div>
+                        </div>
+                    </div>
+                    <div class="tracklist-controls">
+                        <div class="track-count">34 tracks</div>
+                        <button class="toggle-btn" id="toggle-3">▼</button>
+                    </div>
+                </div>
+                <div class="tracks" id="tracks-3">
+
+                    <div class="track" data-track="cio d'or - continuum i © ®">
+                        <div class="track-number">1</div>
+                        <div class="track-info">
+                            <div class="track-name">Cio D'Or - Continuum I © ®</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=w0WVhWZ-gmU" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="cybe - can you hear the rooster crow?">
+                        <div class="track-number">2</div>
+                        <div class="track-info">
+                            <div class="track-name">Cybe - Can You Hear The Rooster Crow?</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=1hpsFXaFwXk" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/9954002-Cybe-Tropisch-Verlangen" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(11%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="bernard bonnier - la demoiselle au corsage vert">
+                        <div class="track-number">3</div>
+                        <div class="track-info">
+                            <div class="track-name">Bernard Bonnier - La Demoiselle au Corsage Vert</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=-Jg_73lFFG0" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Bernard-Bonnier-Casse-t%C3%AAte/release/726964" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(22%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="svitlana nianio - tponiauni init (tropichnyy iniy)">
+                        <div class="track-number">4</div>
+                        <div class="track-info">
+                            <div class="track-name">Svitlana Nianio - Tponiauni Init (Tropichnyy Iniy)</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=HBqcOZNc5Fs" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="ike yard - loss">
+                        <div class="track-number">5</div>
+                        <div class="track-info">
+                            <div class="track-name">Ike Yard - Loss</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=q1o2tJc3yAI" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/225148-Ike-Yard-Ike-Yard" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(67%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="iris - down by the rivrrrs">
+                        <div class="track-number">6</div>
+                        <div class="track-info">
+                            <div class="track-name">Iris - Down by the rivrrrs</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=zSif77IVQdY" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/20335834-Iris-Speah" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(14%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="bohack - good brown">
+                        <div class="track-number">7</div>
+                        <div class="track-info">
+                            <div class="track-name">Bohack - Good Brown</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=JmFRywELCSY" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/723224-Bohack-It-Took-Several-Wives" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(14%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="fielding daws - soggy bones">
+                        <div class="track-number">8</div>
+                        <div class="track-info">
+                            <div class="track-name">Fielding Daws - Soggy Bones</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=qm1N_eExS1A" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="anadol - gizli duygular">
+                        <div class="track-number">9</div>
+                        <div class="track-info">
+                            <div class="track-name">Anadol - Gizli Duygular</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=aRFzMRDx0ds" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/22380685-Anadol-Felicita" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="million brazilians - strange oasis iv">
+                        <div class="track-number">10</div>
+                        <div class="track-info">
+                            <div class="track-name">Million Brazilians - Strange Oasis IV</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=Ob4yDdM6KGk" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Million-Brazilians-Strange-Oasis/release/14264358" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(90%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="mope grooves - swimmer">
+                        <div class="track-number">11</div>
+                        <div class="track-info">
+                            <div class="track-name">Mope Grooves - Swimmer</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=FzpNLzEpTq8" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/14068436-Mope-Grooves-Desire" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(50%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="brenda ray & naffi locksman - rahmatullah">
+                        <div class="track-number">12</div>
+                        <div class="track-info">
+                            <div class="track-name">Brenda Ray & Naffi Locksman - Rahmatullah</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=E50yW8juX5k" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="caroline k - animal lattice">
+                        <div class="track-number">13</div>
+                        <div class="track-info">
+                            <div class="track-name">Caroline K - Animal Lattice</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=WLsAkOmPbq0" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/123166-Caroline-K-Now-Wait-For-Last-Year" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(22%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="stano - seance of a kondalike">
+                        <div class="track-number">14</div>
+                        <div class="track-info">
+                            <div class="track-name">Stano - Seance of a Kondalike</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=0ancAKloT-A" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/12362341-Stano-Content-To-Write-In-I-Dine-Weathercraft" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(8%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="geoffrey landers - stanislowe">
+                        <div class="track-number">15</div>
+                        <div class="track-info">
+                            <div class="track-name">Geoffrey Landers - Stanislowe</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=t5y6I97e1m8" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Geoffrey-Landers-The-Ever-Decimal-Pulse/release/1610817" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(29%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="leven signs - held in arms">
+                        <div class="track-number">16</div>
+                        <div class="track-info">
+                            <div class="track-name">Leven Signs - Held in Arms</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=_M4RDGQsWMA" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/861635-Leven-Signs-Hemp-Is-Here" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="laughing hands - six">
+                        <div class="track-number">17</div>
+                        <div class="track-info">
+                            <div class="track-name">Laughing Hands - Six</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=pwWTiEMgkD8" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/327795-Laughing-Hands-Dog-Photos" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(40%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="k. leimer - agfa lupa">
+                        <div class="track-number">18</div>
+                        <div class="track-info">
+                            <div class="track-name">K. Leimer - Agfa Lupa</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=9ffqTjmr8qk" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/5649018-K-Leimer-A-Period-Of-Review" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="montel palmer - told you not to">
+                        <div class="track-number">19</div>
+                        <div class="track-info">
+                            <div class="track-name">Montel Palmer - Told You Not To</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=mWpMr0g4pHE" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/30941485-Montel-Palmer-Love-Getaway" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="kevin harrison - wooden heartthrob of peking">
+                        <div class="track-number">20</div>
+                        <div class="track-info">
+                            <div class="track-name">Kevin Harrison - Wooden Heartthrob of Peking</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=0ZJwtef6fy0" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Kevin-Harrison-Inscrutably-Obvious/release/716531" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="keeler - the beachcomber's desire">
+                        <div class="track-number">21</div>
+                        <div class="track-info">
+                            <div class="track-name">Keeler - The Beachcomber's Desire</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=qJLW7wtpNA0" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="dennis young - eastern skies 1">
+                        <div class="track-number">22</div>
+                        <div class="track-info">
+                            <div class="track-name">Dennis Young - Eastern Skies 1</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=2cFOLFtw2Ic" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/13721739-Dennis-Young-Visions" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(33%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="tollund men - suffocating heart">
+                        <div class="track-number">23</div>
+                        <div class="track-info">
+                            <div class="track-name">Tollund Men - Suffocating Heart</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=5xNkaD7JOOE" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/8478985-Tollund-Men-Autoerotik" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(40%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="laszlé hortobdgyi - balinese gat">
+                        <div class="track-number">24</div>
+                        <div class="track-info">
+                            <div class="track-name">Laszlé Hortobdgyi - Balinese Gat</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=zwPUtll7jjU" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="kriyashakti - ride the cascade">
+                        <div class="track-number">25</div>
+                        <div class="track-info">
+                            <div class="track-name">KriyaShakti - Ride the Cascade</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=C4l2u0Zw7R8" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="deadline paranoia - birth of a clone">
+                        <div class="track-number">26</div>
+                        <div class="track-info">
+                            <div class="track-name">Deadline Paranoia - Birth of a Clone</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=PgJPLgqnhYI" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/11705536-Deadline-Paranoia-1-3" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="steve shehan - mystic jungle">
+                        <div class="track-number">27</div>
+                        <div class="track-info">
+                            <div class="track-name">Steve Shehan - Mystic Jungle</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=LuXJ6cSxu0A" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/1864883-Steve-Shehan-April-Orchestra-Vol-68-Pr%C3%A9sente-Impressions-De-Voyages" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(17%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="eyeless in gaza - pale saints">
+                        <div class="track-number">28</div>
+                        <div class="track-info">
+                            <div class="track-name">Eyeless In Gaza - Pale Saints</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=FlXnl3ddzzc" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/325860-Eyeless-In-Gaza-Pale-Hands-I-Loved-So-Well" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(40%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="free music - a glass bowl collecting rain">
+                        <div class="track-number">29</div>
+                        <div class="track-info">
+                            <div class="track-name">Free Music - A Glass Bowl Collecting Rain</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=hxXGUPjB1E4" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="alphabets - floor">
+                        <div class="track-number">30</div>
+                        <div class="track-info">
+                            <div class="track-name">alphabets - floor</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=wPMum9Slz7M" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Birdyak-Aberration/release/786422" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(0%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="cromagnon - toth, scribe i">
+                        <div class="track-number">31</div>
+                        <div class="track-info">
+                            <div class="track-name">Cromagnon - Toth, Scribe I</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=LdNVdY-KW3c" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/621361-Cromagnon-Cromagnon" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="sussan deyhim & richard horowitz - got away">
+                        <div class="track-number">32</div>
+                        <div class="track-info">
+                            <div class="track-name">Sussan Deyhim & Richard Horowitz - Got Away</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=FzN8Ip6-nxU" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/20739658-Sussan-Deyhim-Richard-Horowitz-Desert-Equations-Azax-Attra" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(40%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="rosario, e.e. - gifts washed ashore">
+                        <div class="track-number">33</div>
+                        <div class="track-info">
+                            <div class="track-name">Rosario, E.E. - Gifts Washed Ashore</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=YAXD4J8Kjqw" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="mafucage - secret d'africaine">
+                        <div class="track-number">34</div>
+                        <div class="track-info">
+                            <div class="track-name">Mafucage - Secret d'Africaine</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=BaR8MzaNHdU" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="tracklist" data-title="perko-nowadays-july-17-2025.png">
+                <div class="tracklist-header" onclick="toggleTracklist(4)">
+                    <div class="tracklist-info">
+                        <img src="https://images.are.na/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiIzOTA5NTQzNC9vcmlnaW5hbF8zNzcyNjViYjM0NmUyZjY0ZWYxNGVlMzhiOWM0MzcxNi5wbmciLCJlZGl0cyI6eyJyZXNpemUiOnsid2lkdGgiOjE4MDAsImhlaWdodCI6MTgwMCwiZml0IjoiaW5zaWRlIiwid2l0aG91dEVubGFyZ2VtZW50Ijp0cnVlfSwid2VicCI6eyJxdWFsaXR5Ijo3NX0sImpwZWciOnsicXVhbGl0eSI6NzV9LCJyb3RhdGUiOm51bGx9fQ==?bc=0" alt="perko-nowadays-july-17-2025.png" class="tracklist-image" loading="lazy">
+                        <div class="tracklist-text">
+                            <div class="tracklist-title">perko-nowadays-july-17-2025.png</div>
+                            <div class="tracklist-subtitle">32 tracks • 32 YouTube • 22 Discogs</div>
+                        </div>
+                    </div>
+                    <div class="tracklist-controls">
+                        <div class="track-count">32 tracks</div>
+                        <button class="toggle-btn" id="toggle-4">▼</button>
+                    </div>
+                </div>
+                <div class="tracks" id="tracks-4">
+
+                    <div class="track" data-track="mammo - drinks straight from the tape 2">
+                        <div class="track-number">1</div>
+                        <div class="track-info">
+                            <div class="track-name">Mammo - Drinks Straight From the Tape 2</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=qZuBmqKrY1s" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="oren ambarchi & riccardo villalobos - hubris variation">
+                        <div class="track-number">2</div>
+                        <div class="track-info">
+                            <div class="track-name">Oren Ambarchi & Riccardo Villalobos - Hubris Variation</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=XjQmAzkl9tU" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="kyma & uberdog - compactor">
+                        <div class="track-number">3</div>
+                        <div class="track-info">
+                            <div class="track-name">Kyma & Uberdog - Compactor</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=cKPH3JabMzI" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Kyma-Uberdog-Emergency-Series-Vol-1/release/310841" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(29%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="alexander skancke - you get a two">
+                        <div class="track-number">4</div>
+                        <div class="track-info">
+                            <div class="track-name">Alexander Skancke - You Get A Two</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=W96gVlV2-t4" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/31945807-Alexander-Skancke-Unreleased-Tracks-and-Dubs" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(20%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="dj wild - le mur (baby ford’s ‘dogtown remix’)">
+                        <div class="track-number">5</div>
+                        <div class="track-info">
+                            <div class="track-name">DJ WILD - Le Mur (Baby Ford’s ‘Dogtown Remix’)</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=fvdaBDNqsR8" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="cv313 - sailing starts">
+                        <div class="track-number">6</div>
+                        <div class="track-info">
+                            <div class="track-name">cv313 - Sailing Starts</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=NvV16r201Aw" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="question - untitled">
+                        <div class="track-number">7</div>
+                        <div class="track-info">
+                            <div class="track-name">Question - Untitled</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=vEq1sE8UX48" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/5000-Question-7th-Question" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(33%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="pendle coven - modern mode">
+                        <div class="track-number">8</div>
+                        <div class="track-info">
+                            <div class="track-name">Pendle Coven - Modern Mode</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=vJU0MqsJ5Bs" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/534860-Pendle-Coven-Marriage-Of-Convenience-EP" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="deadbeat - the double bong cloud (denial !)">
+                        <div class="track-number">9</div>
+                        <div class="track-info">
+                            <div class="track-name">Deadbeat - The Double Bong Cloud (Denial !)</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=ekZnmv3X38s" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/29505880-Deadbeat-K%C3%BCbler-Ross-Soliloquies" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(11%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="pantytec - elastobabe (soul capsule’s cosmic warrior mix)">
+                        <div class="track-number">10</div>
+                        <div class="track-info">
+                            <div class="track-name">Pantytec - Elastobabe (Soul Capsule’s Cosmic Warrior Mix)</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=iWOGkRnDEMo" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/38572-Pantytec-Elastobabe" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(90%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="snp 500 - unrolled">
+                        <div class="track-number">11</div>
+                        <div class="track-info">
+                            <div class="track-name">SnP 500 - Unrolled</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=p_7JuHvZ-oE" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/34411141-SnP-500-Unrolled" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(90%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="mion - drop the filter">
+                        <div class="track-number">12</div>
+                        <div class="track-info">
+                            <div class="track-name">Mion - Drop The Filter</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=RwAdt62k5AU" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/18719-Mion-Miori-EP" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(14%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="ricardo villalobos - heike (mood mix)">
+                        <div class="track-number">13</div>
+                        <div class="track-info">
+                            <div class="track-name">Ricardo Villalobos - Heike (Mood Mix)</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=LY1YpFr0vGg" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/105494-Ricardo-Villalobos-Heike" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(90%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="afrojack - math">
+                        <div class="track-number">14</div>
+                        <div class="track-info">
+                            <div class="track-name">Afrojack - Math</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=nrd5wGv46F8" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Bart-B-More-Go-Dutch/release/1445692" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(0%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="faithless - we come 1 (rocket vs. jeno remix)">
+                        <div class="track-number">15</div>
+                        <div class="track-info">
+                            <div class="track-name">Faithless - We Come 1 (Rocket vs. Jeno Remix)</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=fwksfQUyCwc" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/7294-Faithless-We-Come-1" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(90%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="diskop - night">
+                        <div class="track-number">16</div>
+                        <div class="track-info">
+                            <div class="track-name">DiSKOP - Night</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=stRQf39urjY" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="eddie richards - medown (evil eddie richards fractured mix)">
+                        <div class="track-number">17</div>
+                        <div class="track-info">
+                            <div class="track-name">Eddie Richards - Medown (Evil Eddie Richards Fractured Mix)</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=UysriPvkIGg" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/225711-Evil-Eddie-Richards-The-9660-EP" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(30%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="truly - el trick ft. edc">
+                        <div class="track-number">18</div>
+                        <div class="track-info">
+                            <div class="track-name">Truly - El Trick ft. EDC</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=3JnG5D5283c" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="a‘ people - do it (metamatics remix)">
+                        <div class="track-number">19</div>
+                        <div class="track-info">
+                            <div class="track-name">A‘ People - Do It (Metamatics Remix)</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=d2GZ1g2dxT4" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/A1-People-Do-It/release/82827" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(43%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="klanggut - sump (klystron remix)">
+                        <div class="track-number">20</div>
+                        <div class="track-info">
+                            <div class="track-name">Klanggut - Sump (Klystron Remix)</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=h3fcM_lOBy8" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Klanggut-Sump/release/64400" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(90%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="smerz - feisty">
+                        <div class="track-number">21</div>
+                        <div class="track-info">
+                            <div class="track-name">Smerz - Feisty</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=_1bd5LGP6TY" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/34116214-Smerz-Big-City-Life" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(17%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="eddie richards - dark 1.3">
+                        <div class="track-number">22</div>
+                        <div class="track-info">
+                            <div class="track-name">Eddie Richards - Dark 1.3</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=OsrHC8bDoHs" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/85841-Eddie-Richards-The-Dark-EP" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(43%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="lil keed - wall 2 wall (autobouncer620 edit)">
+                        <div class="track-number">23</div>
+                        <div class="track-info">
+                            <div class="track-name">Lil Keed - Wall 2 Wall (Autobouncer620 Edit)</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=QwHlXbmoL84" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="jawnino - 40net (lewi boome remix)">
+                        <div class="track-number">24</div>
+                        <div class="track-info">
+                            <div class="track-name">Jawnino - 40net (Lewi Boome Remix)</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=S9pITFmadzA" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="soduh - freddy k">
+                        <div class="track-number">25</div>
+                        <div class="track-info">
+                            <div class="track-name">Soduh - Freddy K</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=6TF-uCrT4vs" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="geeneus - congo">
+                        <div class="track-number">26</div>
+                        <div class="track-info">
+                            <div class="track-name">Geeneus - Congo</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=losSFCGaykA" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Various-Tempa-Allstars-Vol2/release/356284" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(0%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="tactics of bass - tactics of bass">
+                        <div class="track-number">27</div>
+                        <div class="track-info">
+                            <div class="track-name">Tactics Of Bass - Tactics Of Bass</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=c216bR2fYzk" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/182699-Tactics-Of-Bass-Tactics-Of-Bass" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(90%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="slick & flash - the rogue">
+                        <div class="track-number">28</div>
+                        <div class="track-info">
+                            <div class="track-name">Slick & Flash - The Rogue</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=9e4Mb-HS7YQ" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/227177-Various-Audiophiles-11" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(0%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="janet jackson - empty">
+                        <div class="track-number">29</div>
+                        <div class="track-info">
+                            <div class="track-name">Janet Jackson - Empty</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=m9rIjjGmJhM" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/5851677-Janet-Jackson-Janet-The-Velvet-Rope" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(33%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="hopper1000 - cars that go boom">
+                        <div class="track-number">30</div>
+                        <div class="track-info">
+                            <div class="track-name">Hopper1000 - Cars That Go BOOM</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=jOaohO_VHo4" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="the 2 - wels 1">
+                        <div class="track-number">31</div>
+                        <div class="track-info">
+                            <div class="track-name">The 2 - Wels 1</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=m6Y65hohY20" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/410960-Br%C3%B6tzmann-Gania-Drake-The-Wels-Concert" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="the cardigans - erase / rewind">
+                        <div class="track-number">32</div>
+                        <div class="track-info">
+                            <div class="track-name">The Cardigans - Erase / Rewind</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=6WOYnv59Bi8" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/738566-The-Cardigans-EraseRewind" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="tracklist" data-title="unknown.png">
+                <div class="tracklist-header" onclick="toggleTracklist(5)">
+                    <div class="tracklist-info">
+                        <img src="https://images.are.na/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiIzOTA5NTQzNS9vcmlnaW5hbF9hN2Y3MTc4ZTA2YmVlOGNjZDFjNWNlN2RmN2Q5ZGFhZi5wbmciLCJlZGl0cyI6eyJyZXNpemUiOnsid2lkdGgiOjE4MDAsImhlaWdodCI6MTgwMCwiZml0IjoiaW5zaWRlIiwid2l0aG91dEVubGFyZ2VtZW50Ijp0cnVlfSwid2VicCI6eyJxdWFsaXR5Ijo3NX0sImpwZWciOnsicXVhbGl0eSI6NzV9LCJyb3RhdGUiOm51bGx9fQ==?bc=0" alt="unknown.png" class="tracklist-image" loading="lazy">
+                        <div class="tracklist-text">
+                            <div class="tracklist-title">unknown.png</div>
+                            <div class="tracklist-subtitle">16 tracks • 16 YouTube • 13 Discogs</div>
+                        </div>
+                    </div>
+                    <div class="tracklist-controls">
+                        <div class="track-count">16 tracks</div>
+                        <button class="toggle-btn" id="toggle-5">▼</button>
+                    </div>
+                </div>
+                <div class="tracks" id="tracks-5">
+
+                    <div class="track" data-track="stano - drain puppet">
+                        <div class="track-number">1</div>
+                        <div class="track-info">
+                            <div class="track-name">Stano - Drain Puppet</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=WudjXMr1xUA" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Stano-Anthology/release/15880254" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="pain teens - swimming">
+                        <div class="track-number">2</div>
+                        <div class="track-info">
+                            <div class="track-name">Pain Teens - Swimming</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=8G8ye8dql64" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Pain-Teens-Beast-Of-Dreams/release/437593" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(33%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="snowpony - a way to survive">
+                        <div class="track-number">3</div>
+                        <div class="track-info">
+                            <div class="track-name">Snowpony - A Way To Survive</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=VTN52zp9plM" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/222863-Snowpony-The-Slow-Motion-World-Of-Snowpony" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(10%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="sweet trip - no words to be found">
+                        <div class="track-number">4</div>
+                        <div class="track-info">
+                            <div class="track-name">Sweet Trip - No Words To Be Found</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=RSdvW5zVUaA" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/18387652-Sweet-Trip-You-Will-Never-Know-Why" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(17%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="cousin - fussball politics">
+                        <div class="track-number">5</div>
+                        <div class="track-info">
+                            <div class="track-name">Cousin - Fussball Politics</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=_mQti5RCO80" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Cousin-Alternate-Tunings-For-Regular-People/release/5590077" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(11%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="primitive radio gods - the underground solution">
+                        <div class="track-number">6</div>
+                        <div class="track-info">
+                            <div class="track-name">Primitive Radio Gods - The Underground Solution</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=FApEuyKuY98" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/7460944-Primitive-Radio-Gods-Still-Electric" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(38%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="lifeguard - ministry/energie">
+                        <div class="track-number">7</div>
+                        <div class="track-info">
+                            <div class="track-name">Lifeguard - Ministry/Energie</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=n6j2xl33zew" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/32329653-Lifeguard-Ministry-Energie" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(75%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="west coast modem day punk rock orchestra - see what | need">
+                        <div class="track-number">8</div>
+                        <div class="track-info">
+                            <div class="track-name">West Coast Modem Day Punk Rock Orchestra - See What | Need</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=UM5VdfuOg7Y" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="lali puna - left handed (maxi version)">
+                        <div class="track-number">9</div>
+                        <div class="track-info">
+                            <div class="track-name">Lali Puna - Left Handed (Maxi Version)</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=MH7A4Cw9gAI" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="masha qrella -  can't tell">
+                        <div class="track-number">10</div>
+                        <div class="track-info">
+                            <div class="track-name">Masha Qrella -  Can't Tell</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=5NfQvyNMCjs" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/15932366-Various-Sunset-Bungalows" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(0%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="eazyhead - feel alright">
+                        <div class="track-number">11</div>
+                        <div class="track-info">
+                            <div class="track-name">Eazyhead - Feel Alright</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=x2W7coY54xY" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/31746953-Eazyhead-Personal-Echo-Chamber" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(17%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="fan modine - rhubarb pie">
+                        <div class="track-number">12</div>
+                        <div class="track-info">
+                            <div class="track-name">Fan Modine - Rhubarb Pie</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=yTZQEjV3Hdw" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Fan-Modine-Slow-Road-To-Tiny-Empire/release/528983" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(22%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="quiet commotion - r6ken du andas">
+                        <div class="track-number">13</div>
+                        <div class="track-info">
+                            <div class="track-name">Quiet Commotion - R6ken Du Andas</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=I_wnuDRphZ8" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="jessamine - all the same">
+                        <div class="track-number">14</div>
+                        <div class="track-info">
+                            <div class="track-name">Jessamine - All The Same</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=71oNqwUQogo" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/559508-Jessamine-The-Long-Arm-Of-Coincidence" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(25%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="hood - how can you drag your body blindly through?">
+                        <div class="track-number">15</div>
+                        <div class="track-info">
+                            <div class="track-name">Hood - How Can You Drag Your Body Blindly Through?</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=hpf9RvEewKg" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Hood-The-Cycle-Of-Days-And-Seasons/release/1059296" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(7%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="octavius - sudden and increasingly strange behavior">
+                        <div class="track-number">16</div>
+                        <div class="track-info">
+                            <div class="track-name">Octavius - Sudden And Increasingly Strange Behavior</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=Y5qprqt4Qls" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Octavius-Audio-Noir/release/197548" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(12%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="tracklist" data-title="west-mineral-kiosk-radio-august-2025.png">
+                <div class="tracklist-header" onclick="toggleTracklist(6)">
+                    <div class="tracklist-info">
+                        <img src="https://images.are.na/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiIzOTA5NTQzNi9vcmlnaW5hbF9kNDU2MWI1ODE3MjgwMTM0NTFkYTY2ZmYxMDNiMmJlYy5wbmciLCJlZGl0cyI6eyJyZXNpemUiOnsid2lkdGgiOjE4MDAsImhlaWdodCI6MTgwMCwiZml0IjoiaW5zaWRlIiwid2l0aG91dEVubGFyZ2VtZW50Ijp0cnVlfSwid2VicCI6eyJxdWFsaXR5Ijo3NX0sImpwZWciOnsicXVhbGl0eSI6NzV9LCJyb3RhdGUiOm51bGx9fQ==?bc=0" alt="west-mineral-kiosk-radio-august-2025.png" class="tracklist-image" loading="lazy">
+                        <div class="tracklist-text">
+                            <div class="tracklist-title">west-mineral-kiosk-radio-august-2025.png</div>
+                            <div class="tracklist-subtitle">14 tracks • 14 YouTube • 6 Discogs</div>
+                        </div>
+                    </div>
+                    <div class="tracklist-controls">
+                        <div class="track-count">14 tracks</div>
+                        <button class="toggle-btn" id="toggle-6">▼</button>
+                    </div>
+                </div>
+                <div class="tracks" id="tracks-6">
+
+                    <div class="track" data-track="/ koss - phe-afe ie">
+                        <div class="track-number">1</div>
+                        <div class="track-info">
+                            <div class="track-name">/ Koss - Phe-Afe ie</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=-mAwTVf4kfc" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="j jon watts - starchsideao02">
+                        <div class="track-number">2</div>
+                        <div class="track-info">
+                            <div class="track-name">j Jon Watts - STARCHSIDEAO02</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=zfSS1PmGv-k" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="j ada - orty winks 4">
+                        <div class="track-number">3</div>
+                        <div class="track-info">
+                            <div class="track-name">j Ada - orty winks 4</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=HCvR1jYBijU" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="theater1 - heston">
+                        <div class="track-number">4</div>
+                        <div class="track-info">
+                            <div class="track-name">Theater1 - Heston</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=B_kI7LwQyrM" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Various-Radio-Spot-Apocalypse/release/6092479" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(0%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="thomas brinkmann - the more you ignore me the closer i get">
+                        <div class="track-number">5</div>
+                        <div class="track-info">
+                            <div class="track-name">Thomas Brinkmann - The More You Ignore Me The Closer i Get</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=JLpRu8X0Oq8" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/Brinkmann-Lucky-Hands/release/556829" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(8%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="hashnan deejay - 2???">
+                        <div class="track-number">6</div>
+                        <div class="track-info">
+                            <div class="track-name">Hashnan Deejay - 2???</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=XwiVECSQ5bU" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="a sebastiano carghini - mela">
+                        <div class="track-number">7</div>
+                        <div class="track-info">
+                            <div class="track-name">a Sebastiano Carghini - Mela</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=OhN2Yz6QS08" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="rhe remote viewer - ~ last night you said goodbye, now it seems years">
+                        <div class="track-number">8</div>
+                        <div class="track-info">
+                            <div class="track-name">rhe Remote Viewer - ~ Last Night You Said Goodbye, Now It Seems Years</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=78Bq_vaLBdk" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="rest symbol - — empty sun">
+                        <div class="track-number">9</div>
+                        <div class="track-info">
+                            <div class="track-name">Rest Symbol - — Empty Sun</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=yOIpv6Elc3Q" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/33961014-Rest-Symbol-rest-symbol" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(50%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="pse - dream last night">
+                        <div class="track-number">10</div>
+                        <div class="track-info">
+                            <div class="track-name">PSE - Dream Last Night</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=TnSa6PBpMog" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/29899075-Integrity-All-Death-Is-Mine-Total-Domination" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(0%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="schachen & voss - ein raus 4">
+                        <div class="track-number">11</div>
+                        <div class="track-info">
+                            <div class="track-name">Schachen & Voss - ein Raus 4</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=9vbTGk3xlo4" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="1 moonshake - blister i">
+                        <div class="track-number">12</div>
+                        <div class="track-info">
+                            <div class="track-name">1 Moonshake - Blister i</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=rh90Y7fy_Og" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/595283-Moonshake-Secondhand-Clothes" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(17%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="5 ben bondy - ur ghost is my shadow feat. kissen f">
+                        <div class="track-number">13</div>
+                        <div class="track-info">
+                            <div class="track-name">5 Ben Bondy - Ur Ghost is My Shadow feat. Kissen F</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=bZBdpC4c3-0" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track" data-track="woodbine - that's enough a">
+                        <div class="track-number">14</div>
+                        <div class="track-info">
+                            <div class="track-name">Woodbine - That's Enough a</div>
+                            <div class="track-links">
+
+                                <a href="https://www.youtube.com/watch?v=ibwCV7s9JcQ" target="_blank" class="platform-link youtube-link">
+                                    ▶️ YouTube
+                                    <span class="confidence">(80%)</span>
+                                </a>
+
+                                <a href="https://www.discogs.com/release/983261-Woodbine-Woodbine" target="_blank" class="platform-link discogs-link">
+                                    💿 Discogs
+                                    <span class="confidence">(20%)</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        
+        <footer>
+            <p>Generated on 2025-08-27 at 16:12</p>
+            <p>🎵 Built with love for music discovery</p>
+        </footer>
+    </div>
+    
+    <script>
+        function toggleTracklist(index) {
+            const tracks = document.getElementById('tracks-' + index);
+            const button = document.getElementById('toggle-' + index);
+            
+            if (tracks.classList.contains('collapsed')) {
+                tracks.classList.remove('collapsed');
+                button.textContent = '▼';
+            } else {
+                tracks.classList.add('collapsed');
+                button.textContent = '▶';
+            }
+        }
+        
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            const tracklists = document.querySelectorAll('.tracklist');
+            
+            tracklists.forEach(tracklist => {
+                const title = tracklist.dataset.title;
+                const tracks = tracklist.querySelectorAll('.track');
+                let hasMatch = title.includes(query);
+                
+                tracks.forEach(track => {
+                    const trackName = track.dataset.track;
+                    const trackMatch = trackName.includes(query);
+                    
+                    if (trackMatch) {
+                        hasMatch = true;
+                        track.style.display = 'flex';
+                    } else {
+                        track.style.display = query ? 'none' : 'flex';
+                    }
+                });
+                
+                tracklist.style.display = hasMatch || !query ? 'block' : 'none';
+            });
+        });
+        
+        // Auto-expand first tracklist
+        if (document.getElementById('tracks-0')) {
+            // Keep first one open by default
+        }
+    </script>
+</body>
+</html>
