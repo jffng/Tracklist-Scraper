@@ -39,6 +39,7 @@ def process_tracklists(tracklists, discogs_token=None, enable_discogs=True):
     
     # Initialize the search manager
     manager = SearchManager(discogs_token=discogs_token)
+    manager.enable_bandcamp()
     
     # Disable Discogs if requested
     if not enable_discogs:

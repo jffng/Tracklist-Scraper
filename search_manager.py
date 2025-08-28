@@ -4,7 +4,7 @@ Search Manager
 Coordinates searches across multiple music platform crawlers.
 """
 
-from crawlers import YouTubeCrawler, DiscogsCrawler
+from crawlers import YouTubeCrawler, DiscogsCrawler, BandcampCrawler
 
 
 class SearchManager:
@@ -19,8 +19,10 @@ class SearchManager:
         """
         self.crawlers = {
             'youtube': YouTubeCrawler(delay_between_searches=1.5),
-            'discogs': DiscogsCrawler(delay_between_searches=1.0, user_token=discogs_token)
+            'discogs': DiscogsCrawler(delay_between_searches=1.0, user_token=discogs_token),
+            'bandcamp': BandcampCrawler(delay_between_searches=2.0)
         }
+        # Enable all platforms - Bandcamp now provides search URLs when blocked
         self.enabled_platforms = set(self.crawlers.keys())
     
     def enable_platform(self, platform: str):
@@ -31,6 +33,15 @@ class SearchManager:
     def disable_platform(self, platform: str):
         """Disable a specific platform for searching."""
         self.enabled_platforms.discard(platform)
+    
+    def enable_bandcamp(self):
+        """Enable Bandcamp with a warning about potential blocking."""
+        if 'bandcamp' in self.crawlers:
+            self.enabled_platforms.add('bandcamp')
+            print("⚠️  Bandcamp enabled - may be blocked by anti-bot protection")
+            print("   If you get 403 errors, Bandcamp is blocking automated requests")
+        else:
+            print("Bandcamp crawler not available.")
     
     def search_track(self, track: str) -> dict:
         

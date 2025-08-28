@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tracklist.title }} - Tracklist{% endblock %}
+
+{% block content %}
+<header>
+    <div class="tracklist-header-content">
+        <div class="tracklist-info">
+            <h1>{{ tracklist.title }}</h1>
+            <div class="tracklist-meta">
+                {{ tracklist.tracks|length }} tracks • 
+                {{ tracklist.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                {% if tracklist.search_status == 'processing' %}
+                • <span class="status processing">Searching for links...</span>
+                {% elif tracklist.search_status == 'completed' %}
+                • <span class="status completed">Search complete</span>
+                {% elif tracklist.search_status == 'failed' %}
+                • <span class="status failed">Search failed</span>
+                {% else %}
+                • <span class="status pending">Search pending</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="header-actions">
+            <form method="POST" action="{{ url_for('retrigger_search', tracklist_id=tracklist.id) }}" style="display: inline;">
+                <button type="submit" class="research-btn">
+                    🔄 Re-search
+                </button>
+            </form>
+            <a href="{{ url_for('index') }}" class="back-link">← Back to Collection</a>
+        </div>
+    </div>
+</header>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="flash-messages">
+            {% for message in messages %}
+                <div class="flash-message">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+{% if tracklist.search_status == 'processing' %}
+<div class="progress-section">
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: {{ tracklist.search_progress }}%"></div>
+    </div>
+    <div class="progress-text" id="progressText">
+        Searching for platform links... {{ tracklist.search_progress }}%
+    </div>
+</div>
+{% endif %}
+
+<div class="search-box">
+    <input type="text" class="search-input" placeholder="Search tracks..." id="searchInput">
+</div>
+
+<div id="tracks">
+    {% for track in tracklist.tracks %}
+    <div class="track" data-track="{{ track.track_name.lower() }}">
+        <div class="track-number">{{ loop.index }}</div>
+        <div class="track-info">
+            <div class="track-name">{{ track.track_name }}</div>
+            <div class="track-links">
+                {% if track.youtube_url %}
+                <a href="{{ track.youtube_url }}" target="_blank" class="platform-link youtube-link">
+                    YouTube
+                </a>
+                {% endif %}
+                
+                {% if track.discogs_url %}
+                <a href="{{ track.discogs_url }}" target="_blank" class="platform-link discogs-link">
+                    Discogs
+                </a>
+                {% endif %}
+                
+                {% if track.bandcamp_url %}
+                <a href="{{ track.bandcamp_url }}" target="_blank" class="platform-link bandcamp-link">
+                    Bandcamp
+                </a>
+                {% endif %}
+                
+                {% if not track.youtube_url and not track.discogs_url and not track.bandcamp_url %}
+                    {% if tracklist.search_status == 'processing' %}
+                    <span class="no-results">Searching...</span>
+                    {% elif tracklist.search_status == 'completed' %}
+                    <span class="no-results">No links found</span>
+                    {% else %}
+                    <span class="no-results">Search pending</span>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if tracklist.extracted_text %}
+<div class="extracted-text-section">
+    <details>
+        <summary>View extracted text</summary>
+        <pre class="extracted-text">{{ tracklist.extracted_text }}</pre>
+    </details>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block head_extra %}
+<style>
+.tracklist-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.tracklist-info h1 {
+    margin-bottom: 10px;
+    font-size: 2em;
+    font-weight: 300;
+}
+
+.tracklist-meta {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.status {
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+}
+
+.status.pending {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.status.processing {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status.completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status.failed {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.research-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+}
+
+.research-btn:hover:not(:disabled) {
+    background: #0056b3;
+}
+
+.research-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.back-link {
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.back-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    text-decoration: none;
+}
+
+.progress-section {
+    background: #f8f9fa;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #007bff;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    text-align: center;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.extracted-text-section {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.extracted-text-section summary {
+    cursor: pointer;
+    font-weight: 500;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.extracted-text {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9em;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.flash-messages {
+    margin: 20px 0;
+}
+
+.flash-message {
+    padding: 12px;
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.flash-message:last-child {
+    margin-bottom: 0;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('keyup', function() {
+        const filter = searchInput.value.toLowerCase();
+        const tracks = document.querySelectorAll('.track');
+
+        tracks.forEach(track => {
+            const trackName = track.dataset.track;
+            if (trackName.includes(filter)) {
+                track.style.display = '';
+            } else {
+                track.style.display = 'none';
+            }
+        });
+    });
+
+    // Handle progress updates if search is processing
+    {% if tracklist.search_status == 'processing' %}
+    const eventSource = new EventSource('{{ url_for("tracklist_progress", tracklist_id=tracklist.id) }}');
+    
+    eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        
+        if (progressFill && progressText) {
+            progressFill.style.width = data.progress + '%';
+            progressText.textContent = 'Searching for platform links... ' + data.progress + '%';
+        }
+        
+        if (data.status === 'completed' || data.status === 'failed') {
+            eventSource.close();
+            // Reload page to show updated results
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        }
+    };
+    {% endif %}
+});
+</script>
+{% endblock %}

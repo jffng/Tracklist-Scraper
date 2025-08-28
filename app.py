@@ -1,322 +1,313 @@
 #!/usr/bin/env python3
 """
-Are.na Tracklist OCR Extractor
+Tracklist.io Flask Application
 
-Fetches images from an are.na channel and extracts text using Tesseract OCR.
+A web application that serves tracklist data with YouTube and Discogs links.
 """
 
-import requests
-import pytesseract
-from PIL import Image
 import json
 import os
-from urllib.parse import urlparse
-import tempfile
-import hashlib
-from io import BytesIO
-import re
+import threading
+from datetime import datetime
+from flask import Flask, render_template, jsonify, request, redirect, url_for, flash, Response
+from werkzeug.utils import secure_filename
+from load_env import load_env
+from ocr_processor import OCRProcessor
+from models import db, Tracklist, Track
+from search_manager import SearchManager
 
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'your-secret-key-here'  # Change this in production
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tracklists.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-class ArenaTracklistExtractor:
-    def __init__(self, channel_url="https://api.are.na/v2/channels/tracklists-bjgvj5dpt3k/contents"):
-        self.channel_url = channel_url
-        self.session = requests.Session()
-        self.session.headers.update({
-            'User-Agent': 'Arena Tracklist Extractor 1.0'
-        })
+# Create upload directory if it doesn't exist
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-    def fetch_channel_data(self):
-        """Fetch JSON data from the are.na API endpoint."""
-        print(f"Fetching data from: {self.channel_url}")
-        try:
-            response = self.session.get(self.channel_url)
-            response.raise_for_status()
-            return response.json()
-        except requests.RequestException as e:
-            print(f"Error fetching channel data: {e}")
-            return None
+# Initialize extensions
+db.init_app(app)
 
-    def extract_image_urls(self, data):
-        """Extract image URLs from the contents array."""
-        image_urls = []
-        
-        if not data or 'contents' not in data:
-            print("No contents found in the data")
-            return image_urls
+# Load environment variables first
+if load_env():
+    print("🔧 Loaded environment variables from .env file")
 
-        contents = data['contents']
-        print(f"Found {len(contents)} items in contents")
+# Initialize processors after environment is loaded
+ocr_processor = OCRProcessor()
+search_manager = SearchManager(discogs_token=os.environ.get('DISCOGS_TOKEN'))
 
-        for i, item in enumerate(contents):
-            if 'image' in item and item['image']:
-                image_obj = item['image']
-                if 'large' in image_obj and 'url' in image_obj['large']:
-                    url = image_obj['large']['url']
-                    title = item.get('title', f'Image {i+1}')
-                    image_urls.append({
-                        'url': url,
-                        'title': title,
-                        'index': i
-                    })
-                    print(f"Found image: {title} -> {url}")
-
-        print(f"Total images found: {len(image_urls)}")
-        return image_urls
-
-    def download_and_ocr_image(self, image_url, max_retries=3):
-        """Download an image from URL and perform OCR directly in memory."""
-        for attempt in range(max_retries):
+def load_tracklists():
+    """Load tracklist data from JSON file."""
+    # Look for enhanced data first, then fall back to basic data
+    input_files = ['tracklists_enhanced.json', 'tracklists_with_youtube.json', 'extracted_tracklists.json']
+    
+    for filename in input_files:
+        if os.path.exists(filename):
             try:
-                print(f"Downloading image from: {image_url}")
-                response = self.session.get(image_url, timeout=30)
-                response.raise_for_status()
+                with open(filename, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except Exception as e:
+                print(f"⚠️  Could not read {filename}: {e}")
+                continue
+    
+    return []
+
+def get_tracklist_stats(tracklists):
+    """Calculate basic statistics for the tracklists."""
+    total_tracklists = len(tracklists)
+    total_tracks = 0
+    
+    for tracklist in tracklists:
+        if isinstance(tracklist, dict):
+            tracks = tracklist.get('tracks', [])
+            total_tracks += len(tracks)
+    
+    return {
+        'total_tracklists': total_tracklists,
+        'total_tracks': total_tracks
+    }
+
+def allowed_file(filename):
+    """Check if file extension is allowed."""
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def process_tracklist_search(tracklist_id):
+    """Background function to search for platform links for all tracks in a tracklist."""
+    def run_search():
+        with app.app_context():
+            try:
+                tracklist = Tracklist.query.get(tracklist_id)
+                if not tracklist:
+                    return
                 
-                # Check if we actually got image content
-                if len(response.content) < 100:
-                    print(f"Downloaded file too small ({len(response.content)} bytes), skipping")
-                    return None
+                # Update status to processing
+                tracklist.search_status = 'processing'
+                tracklist.search_progress = 0
+                db.session.commit()
                 
-                print(f"Downloaded {len(response.content)} bytes, processing with OCR...")
+                tracks = Track.query.filter_by(tracklist_id=tracklist_id).all()
+                total_tracks = len(tracks)
                 
-                # Try to open with PIL to check for corruption
-                img = None
-                try:
-                    img = Image.open(BytesIO(response.content))
-                    img.verify()  # Verify the image integrity
-                    print("Image verification passed")
+                for i, track in enumerate(tracks):
+                    # Search for platform links
+                    search_result = search_manager.search_track(track.track_name)
                     
-                    # Reopen since verify() closes the image
-                    img = Image.open(BytesIO(response.content))
+                    # Update track with results
+                    platforms = search_result.get('platforms', {})
                     
-                except Exception as e:
-                    print(f"Image verification failed: {e}")
-                    print("Attempting to load image anyway, ignoring corruption...")
-                    try:
-                        # Try to load anyway, ignoring errors
-                        img = Image.open(BytesIO(response.content))
-                        # Force load the image data
-                        img.load()
-                        print("Successfully loaded potentially corrupted image")
-                    except Exception as load_error:
-                        print(f"Failed to load image even with error tolerance: {load_error}")
-                        if attempt < max_retries - 1:
-                            print(f"Retrying... (attempt {attempt + 2}/{max_retries})")
-                            continue
-                        return None
-                
-                # Handle different image formats, especially PNG
-                print(f"Image mode: {img.mode}, format: {img.format}")
-                
-                # Special handling for PNG images
-                if img.format == 'PNG':
-                    print("PNG detected - applying special preprocessing...")
+                    if platforms.get('youtube', {}).get('url'):
+                        track.youtube_url = platforms['youtube']['url']
+                        track.youtube_confidence = platforms['youtube']['confidence']
                     
-                    # Handle transparency in PNG
-                    if img.mode in ('RGBA', 'LA'):
-                        print("PNG has transparency, converting to white background...")
-                        # Create a white background
-                        background = Image.new('RGB', img.size, (255, 255, 255))
-                        if img.mode == 'RGBA':
-                            background.paste(img, mask=img.split()[3])  # Use alpha channel as mask
-                        else:  # LA mode
-                            background.paste(img.convert('RGB'))
-                        img = background
-                    elif img.mode == 'P':
-                        print("PNG in palette mode, converting...")
-                        img = img.convert('RGB')
-                    elif img.mode not in ('RGB', 'L'):
-                        print(f"Converting PNG from {img.mode} to RGB")
-                        img = img.convert('RGB')
-                else:
-                    # Standard conversion for non-PNG images
-                    if img.mode not in ('RGB', 'L'):
-                        print(f"Converting image from {img.mode} to RGB")
-                        img = img.convert('RGB')
-                
-                # Optional: Apply image enhancements for better OCR
-                try:
-                    from PIL import ImageEnhance, ImageFilter
+                    if platforms.get('discogs', {}).get('url'):
+                        track.discogs_url = platforms['discogs']['url']
+                        track.discogs_confidence = platforms['discogs']['confidence']
                     
-                    # Convert to grayscale for better OCR if it's not already
-                    if img.mode == 'RGB':
-                        print("Converting to grayscale for OCR...")
-                        img_gray = img.convert('L')
-                        
-                        # Enhance contrast
-                        enhancer = ImageEnhance.Contrast(img_gray)
-                        img_enhanced = enhancer.enhance(1.5)  # Increase contrast
-                        
-                        # Optional: Apply slight sharpening
-                        img_enhanced = img_enhanced.filter(ImageFilter.SHARPEN)
-                        
-                        img = img_enhanced
-                except ImportError:
-                    print("Image enhancement modules not available, using original image")
+                    if platforms.get('bandcamp', {}).get('url'):
+                        track.bandcamp_url = platforms['bandcamp']['url']
+                        track.bandcamp_confidence = platforms['bandcamp']['confidence']
+                    
+                    # Update progress
+                    tracklist.search_progress = int((i + 1) / total_tracks * 100)
+                    db.session.commit()
                 
-                # Perform OCR with custom configuration for better text detection
-                print("Performing OCR...")
+                # Mark as completed
+                tracklist.search_status = 'completed'
+                tracklist.search_progress = 100
+                db.session.commit()
                 
-                # Try different OCR configurations
-                custom_config = r'--oem 3 --psm 6'  # Assume uniform block of text
-                try:
-                    text = pytesseract.image_to_string(img, config=custom_config)
-                except:
-                    print("Custom OCR config failed, trying default...")
-                    text = pytesseract.image_to_string(img)
-                
-                result_text = text.strip()
-                
-                if result_text:
-                    print(f"OCR successful! Extracted {len(result_text)} characters")
-                    return result_text
-                else:
-                    print("OCR completed but no text was extracted")
-                    return ""
-                
-            except requests.RequestException as e:
-                print(f"Network error (attempt {attempt + 1}/{max_retries}): {e}")
-                if attempt < max_retries - 1:
-                    print("Retrying...")
-                    continue
-                return None
+                print(f"✅ Completed search for tracklist {tracklist_id}")
                 
             except Exception as e:
-                print(f"Unexpected error processing image (attempt {attempt + 1}/{max_retries}): {e}")
-                if attempt < max_retries - 1:
-                    print("Retrying...")
-                    continue
-                return None
-        
-        print("All retry attempts failed")
-        return None
+                print(f"❌ Error processing tracklist {tracklist_id}: {e}")
+                tracklist = Tracklist.query.get(tracklist_id)
+                if tracklist:
+                    tracklist.search_status = 'failed'
+                    db.session.commit()
+    
+    # Start the search in a background thread
+    thread = threading.Thread(target=run_search)
+    thread.daemon = True
+    thread.start()
 
-    def parse_tracks_from_text(self, text):
-        """Parse tracks from extracted text in the format 'Artist - Track' or 'Track - Artist'."""
-        if not text:
-            return []
-        
-        tracks = []
-        lines = text.split('\n')
-        
-        for line in lines:
-            line = line.strip()
-            if not line:
-                continue
-            
-            # Look for patterns with various separators
-            # This regex looks for text, followed by various separators, followed by more text
-            # Including: - – — ~ | // \\ :: = --> <-- >> << and double versions
-            track_pattern = r'^(.+?)\s*(?:[-–—~|/\\:=]|(?:-->|<--|>>|<<)|(?:--)|(?://)|(?:\\\\)|(?:::))\s*(.+)$'
-            match = re.match(track_pattern, line)
-            
-            if match:
-                part1 = match.group(1).strip()
-                part2 = match.group(2).strip()
-                
-                # Skip if either part is too short or contains mainly special characters
-                if (len(part1) < 2 or len(part2) < 2 or 
-                    re.match(r'^[^\w\s]*$', part1) or re.match(r'^[^\w\s]*$', part2)):
-                    continue
-                
-                # Clean up common OCR artifacts and formatting - only remove truly problematic chars
-                part1 = re.sub(r'^[*#@$%^&_+=|\\<>]*|[*#@$%^&_+=|\\<>]*$', '', part1)  # Remove specific problematic chars
-                part2 = re.sub(r'^[*#@$%^&_+=|\\<>]*|[*#@$%^&_+=|\\<>]*$', '', part2)
-                
-                if part1 and part2:
-                    # Store the original format, we can't reliably determine which is artist vs track
-                    tracks.append(f"{part1} - {part2}")
-        
-        return tracks
+@app.route('/')
+def index():
+    """Main tracklist page - shows list of all tracklists."""
+    tracklists = Tracklist.query.order_by(Tracklist.created_at.desc()).all()
+    stats = {
+        'total_tracklists': len(tracklists),
+        'total_tracks': sum(len(tl.tracks) for tl in tracklists)
+    }
+    return render_template('index.html', tracklists=tracklists, stats=stats)
 
-    def process_channel(self):
-        """Main method to process the entire channel."""
-        print("Starting are.na channel processing...")
-        
-        # Fetch channel data
-        data = self.fetch_channel_data()
-        if not data:
-            print("Failed to fetch channel data")
-            return
-        
-        # Extract image URLs
-        image_urls = self.extract_image_urls(data)
-        if not image_urls:
-            print("No images found in the channel")
-            return
-        
-        # Process each image
-        results = []
-        
-        for img_info in image_urls:
-            print(f"\n{'='*60}")
-            print(f"Processing: {img_info['title']}")
-            print(f"{'='*60}")
-            
-            # Download and extract text in one step
-            extracted_text = self.download_and_ocr_image(img_info['url'])
-            
-            if extracted_text:
-                # Parse tracks from the extracted text
-                tracks = self.parse_tracks_from_text(extracted_text)
+@app.route('/tracklist/<tracklist_id>')
+def view_tracklist(tracklist_id):
+    """View individual tracklist with tracks and links."""
+    tracklist = Tracklist.query.get_or_404(tracklist_id)
+    return render_template('tracklist.html', tracklist=tracklist)
+
+@app.route('/tracklist/<tracklist_id>/progress')
+def tracklist_progress(tracklist_id):
+    """Server-Sent Events endpoint for tracklist search progress."""
+    def generate():
+        while True:
+            with app.app_context():
+                tracklist = Tracklist.query.get(tracklist_id)
+                if not tracklist:
+                    break
                 
-                result = {
-                    'title': img_info['title'],
-                    'url': img_info['url'],
-                    'extracted_text': extracted_text,
-                    'tracks': tracks
+                data = {
+                    'status': tracklist.search_status,
+                    'progress': tracklist.search_progress
                 }
-                results.append(result)
-                print(f"✅ Success! Extracted text length: {len(extracted_text)} characters")
-                print(f"🎵 Found {len(tracks)} tracks")
-                if len(extracted_text) > 100:
-                    print(f"Preview: {extracted_text[:100]}...")
-                else:
-                    print(f"Full text: {extracted_text}")
-                    
-                # Show some parsed tracks if any were found
-                if tracks:
-                    print("Sample tracks:")
-                    for i, track in enumerate(tracks[:3]):  # Show first 3 tracks
-                        print(f"  {i+1}. {track}")
-                    if len(tracks) > 3:
-                        print(f"  ... and {len(tracks) - 3} more")
-            elif extracted_text == "":
-                print("⚠️  Image processed but no text was detected")
-            else:
-                print("❌ Failed to process this image")
-        
-        return results
-
-    def save_results(self, results, output_file="extracted_tracklists.json"):
-        """Save the extraction results to a JSON file."""
-        with open(output_file, 'w', encoding='utf-8') as f:
-            json.dump(results, f, indent=2, ensure_ascii=False)
-        print(f"Results saved to {output_file}")
-
-
-def main():
-    """Main function to run the extractor."""
-    extractor = ArenaTracklistExtractor()
+                
+                yield f"data: {json.dumps(data)}\n\n"
+                
+                if tracklist.search_status in ['completed', 'failed']:
+                    break
+            
+            import time
+            time.sleep(2)  # Check every 2 seconds
     
-    # Process the channel and extract text from images
-    results = extractor.process_channel()
+    return Response(generate(), mimetype='text/event-stream')
+
+@app.route('/tracklist/<tracklist_id>/research', methods=['POST'])
+def retrigger_search(tracklist_id):
+    """Retrigger search for an existing tracklist."""
+    tracklist = Tracklist.query.get_or_404(tracklist_id)
     
-    if results:
-        print(f"\n{'='*50}")
-        print("EXTRACTION RESULTS")
-        print(f"{'='*50}")
-        
-        for i, result in enumerate(results, 1):
-            print(f"\n{i}. {result['title']}")
-            print(f"URL: {result['url']}")
-            print(f"Extracted Text:\n{result['extracted_text']}")
-            print("-" * 50)
-        
-        # Save results to file
-        extractor.save_results(results)
-    else:
-        print("No text was extracted from any images")
+    # Reset search status and progress
+    tracklist.search_status = 'pending'
+    tracklist.search_progress = 0
+    
+    # Clear existing platform links
+    for track in tracklist.tracks:
+        track.youtube_url = None
+        track.youtube_confidence = None
+        track.discogs_url = None
+        track.discogs_confidence = None
+        track.bandcamp_url = None
+        track.bandcamp_confidence = None
+    
+    db.session.commit()
+    
+    # Start background search process
+    process_tracklist_search(tracklist_id)
+    
+    flash('Search process restarted!')
+    return redirect(url_for('view_tracklist', tracklist_id=tracklist_id))
 
+@app.route('/api/tracklists')
+def api_tracklists():
+    """API endpoint for tracklist data."""
+    tracklists = load_tracklists()
+    return jsonify(tracklists)
 
-if __name__ == "__main__":
-    main()
+@app.route('/api/stats')
+def api_stats():
+    """API endpoint for basic statistics."""
+    tracklists = load_tracklists()
+    stats = get_tracklist_stats(tracklists)
+    return jsonify(stats)
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_tracklist():
+    """Upload and process a tracklist image."""
+    if request.method == 'POST':
+        # Check if file was uploaded
+        if 'file' not in request.files:
+            flash('No file selected')
+            return redirect(request.url)
+        
+        file = request.files['file']
+        title = request.form.get('title', '')
+        
+        if file.filename == '':
+            flash('No file selected')
+            return redirect(request.url)
+        
+        if file and allowed_file(file.filename):
+            try:
+                # Secure the filename
+                filename = secure_filename(file.filename)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                
+                # Save the file
+                file.save(filepath)
+                
+                # Process the image with OCR
+                tracklist_data = ocr_processor.process_tracklist_image(filepath, title)
+                
+                # Create tracklist in database
+                tracklist = Tracklist(
+                    title=tracklist_data['title'],
+                    extracted_text=tracklist_data['extracted_text'],
+                    search_status='pending'
+                )
+                
+                db.session.add(tracklist)
+                db.session.flush()  # Get the ID
+                
+                # Create track records
+                for track_name in tracklist_data['tracks']:
+                    track = Track(
+                        track_name=track_name,
+                        tracklist_id=tracklist.id
+                    )
+                    db.session.add(track)
+                
+                db.session.commit()
+                
+                # Clean up uploaded file
+                os.remove(filepath)
+                
+                # Start background search process
+                process_tracklist_search(tracklist.id)
+                
+                flash(f'Successfully processed tracklist: {len(tracklist_data["tracks"])} tracks found')
+                return redirect(url_for('view_tracklist', tracklist_id=tracklist.id))
+                
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error processing image: {str(e)}')
+                return redirect(request.url)
+        else:
+            flash('Invalid file type. Please upload an image file.')
+            return redirect(request.url)
+    
+    return render_template('upload.html')
+
+@app.route('/health')
+def health():
+    """Health check endpoint."""
+    return jsonify({'status': 'healthy', 'timestamp': datetime.now().isoformat()})
+
+if __name__ == '__main__':
+    print("🎵 Starting Tracklist.io Flask Server")
+    print("=" * 50)
+    
+    # Initialize database
+    with app.app_context():
+        db.create_all()
+        print("✅ Database initialized")
+    
+    # Check if we have data
+    with app.app_context():
+        tracklists = Tracklist.query.all()
+        if tracklists:
+            stats = {
+                'total_tracklists': len(tracklists),
+                'total_tracks': sum(len(tl.tracks) for tl in tracklists)
+            }
+            print(f"📊 Loaded {stats['total_tracklists']} tracklists with {stats['total_tracks']} tracks")
+        else:
+            print("⚠️  No tracklist data found!")
+            print("   Upload images via /upload to get started")
+    
+    print("\n🌐 Server starting...")
+    print("   Local: http://localhost:8000")
+    print("   Press Ctrl+C to stop")
+    
+    app.run(debug=True, host='0.0.0.0', port=8000)

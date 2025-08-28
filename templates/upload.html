@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Tracklist{% endblock %}
+
+{% block content %}
+<header>
+    <h1>Upload Tracklist</h1>
+    <p>Upload an image of a tracklist to extract tracks using OCR</p>
+</header>
+
+<div class="upload-form">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                    <div class="flash-message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    <form method="post" enctype="multipart/form-data" class="upload-form-content">
+        <div class="form-group">
+            <label for="title">Tracklist Title (optional):</label>
+            <input type="text" id="title" name="title" placeholder="Enter a title for this tracklist">
+        </div>
+        
+        <div class="form-group">
+            <label for="file">Select Image:</label>
+            <input type="file" id="file" name="file" accept="image/*" required>
+            <small>Supported formats: PNG, JPG, JPEG, GIF, BMP, TIFF (max 16MB)</small>
+        </div>
+        
+        <button type="submit" class="upload-btn">Process Tracklist</button>
+    </form>
+    
+    <div class="upload-info">
+        <h3>How it works:</h3>
+        <ol>
+            <li>Upload an image of a tracklist (photo, screenshot, etc.)</li>
+            <li>Our OCR system will extract text from the image</li>
+            <li>Tracks will be parsed and added to your collection</li>
+            <li>You can then search for YouTube, Discogs, and Bandcamp links</li>
+        </ol>
+        
+        <h3>Tips for best results:</h3>
+        <ul>
+            <li>Use clear, high-contrast images</li>
+            <li>Ensure text is readable and not blurry</li>
+            <li>Track format should be "Artist - Track" or similar</li>
+            <li>Avoid handwritten text when possible</li>
+        </ul>
+    </div>
+</div>
+
+<div class="back-link">
+    <a href="{{ url_for('index') }}">← Back to Tracklists</a>
+</div>
+{% endblock %}
+
+{% block head_extra %}
+<style>
+.upload-form {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.upload-form-content {
+    background: white;
+    padding: 30px;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group input[type="text"],
+.form-group input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    font-family: 'Public Sans', sans-serif;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 5px;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.upload-btn {
+    background: #333;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    font-size: 16px;
+    font-family: 'Public Sans', sans-serif;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.upload-btn:hover {
+    background: #555;
+}
+
+.upload-info {
+    background: #f8f8f8;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+}
+
+.upload-info h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.upload-info ol,
+.upload-info ul {
+    margin-bottom: 20px;
+    padding-left: 20px;
+}
+
+.upload-info li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.back-link {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.back-link a {
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.back-link a:hover {
+    text-decoration: underline;
+}
+
+.flash-messages {
+    margin-bottom: 20px;
+}
+
+.flash-message {
+    padding: 12px;
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.flash-message:last-child {
+    margin-bottom: 0;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Tracklist Collection{% endblock %}
+
+{% block content %}
+<header>
+    <h1>Tracklist Collection</h1>
+    <p>Upload tracklist images and discover music across platforms</p>
+    <div class="header-actions">
+        <a href="{{ url_for('upload_tracklist') }}" class="upload-link">📷 Upload New Tracklist</a>
+    </div>
+</header>
+
+<div class="stats">
+    <div class="stat">
+        <span class="stat-number">{{ stats.total_tracklists }}</span>
+        <span class="stat-label">Tracklists</span>
+    </div>
+    <div class="stat">
+        <span class="stat-number">{{ stats.total_tracks }}</span>
+        <span class="stat-label">Total Tracks</span>
+    </div>
+</div>
+
+<div class="search-box">
+    <input type="text" class="search-input" placeholder="Search tracklists..." id="searchInput">
+</div>
+
+<div id="tracklists">
+    {% if tracklists %}
+        {% for tracklist in tracklists %}
+        <div class="tracklist-card" data-title="{{ tracklist.title.lower() }}">
+            <div class="tracklist-header">
+                <div class="tracklist-info">
+                    <div class="tracklist-title">{{ tracklist.title }}</div>
+                    <div class="tracklist-meta">
+                        {{ tracklist.tracks|length }} tracks • 
+                        {{ tracklist.created_at.strftime('%B %d, %Y') }}
+                        {% if tracklist.search_status == 'processing' %}
+                        • <span class="status processing">Searching...</span>
+                        {% elif tracklist.search_status == 'completed' %}
+                        • <span class="status completed">Complete</span>
+                        {% elif tracklist.search_status == 'failed' %}
+                        • <span class="status failed">Failed</span>
+                        {% else %}
+                        • <span class="status pending">Pending</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="tracklist-actions">
+                    <a href="{{ url_for('view_tracklist', tracklist_id=tracklist.id) }}" class="view-btn">View</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <h3>No tracklists yet</h3>
+            <p>Upload your first tracklist image to get started!</p>
+            <a href="{{ url_for('upload_tracklist') }}" class="upload-btn">Upload Tracklist</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block head_extra %}
+<style>
+.stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2em;
+    font-weight: 600;
+    display: block;
+    color: #333;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    color: #666;
+    font-weight: 400;
+}
+
+.tracklist-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 20px;
+    transition: box-shadow 0.2s ease;
+}
+
+.tracklist-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.tracklist-header {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tracklist-title {
+    font-size: 1.2em;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.tracklist-meta {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.status {
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+}
+
+.status.pending {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.status.processing {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status.completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status.failed {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.view-btn {
+    background: #333;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9em;
+    transition: background 0.2s ease;
+}
+
+.view-btn:hover {
+    background: #555;
+    color: white;
+    text-decoration: none;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.empty-state h3 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.empty-state p {
+    margin-bottom: 20px;
+}
+
+.upload-btn {
+    background: #333;
+    color: white;
+    padding: 12px 24px;
+    text-decoration: none;
+    border-radius: 4px;
+    display: inline-block;
+    transition: background 0.2s ease;
+}
+
+.upload-btn:hover {
+    background: #555;
+    color: white;
+    text-decoration: none;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('keyup', function() {
+        const filter = searchInput.value.toLowerCase();
+        const tracklists = document.querySelectorAll('.tracklist-card');
+
+        tracklists.forEach(tracklist => {
+            const title = tracklist.dataset.title;
+            if (title.includes(filter)) {
+                tracklist.style.display = '';
+            } else {
+                tracklist.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
